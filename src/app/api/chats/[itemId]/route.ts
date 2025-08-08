@@ -1,5 +1,3 @@
-// /api/chat/[itemId]/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
@@ -44,9 +42,13 @@ export async function GET(
       .sort({ createdAt: 1 });
 
     return NextResponse.json({ messages: chats }, { status: 200 });
-  } catch (err: any) {
-    console.error("Chat fetch error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("Chat fetch error:", error);
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
@@ -103,8 +105,12 @@ export async function POST(
       .populate("item", "title");
 
     return NextResponse.json({ message: populatedChat }, { status: 201 });
-  } catch (err: any) {
-    console.error("Chat post error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("Chat post error:", error);
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
