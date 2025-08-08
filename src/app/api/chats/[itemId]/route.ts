@@ -8,23 +8,19 @@ import fs from "fs";
 import path from "path";
 import { Buffer } from "buffer";
 
-// Define type for route context params
-type RouteContext = {
-  params: {
-    itemId: string;
-  };
-};
-
 const getAdminUser = async () => {
   return await User.findOne({ isAdmin: true });
 };
 
 // GET messages
-export async function GET(req: NextRequest, context: RouteContext) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { itemId: string } }
+) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
-    const { itemId } = context.params;
+    const { itemId } = params;
 
     const item = await Item.findById(itemId);
     if (!item || !item.claimedBy)
@@ -57,11 +53,14 @@ export async function GET(req: NextRequest, context: RouteContext) {
 }
 
 // POST message
-export async function POST(req: NextRequest, context: RouteContext) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { itemId: string } }
+) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
-    const { itemId } = context.params;
+    const { itemId } = params;
 
     const item = await Item.findById(itemId);
     if (!item || !item.claimedBy)
