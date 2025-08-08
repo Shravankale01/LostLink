@@ -42,7 +42,7 @@ export default function AddItemPage() {
 
       toast.success("Item added successfully!");
       router.push("/profile");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.response?.data?.error || "Something went wrong");
     } finally {
       setLoading(false);
@@ -187,3 +187,4 @@ export default function AddItemPage() {
     </div>
   );
 }
+
