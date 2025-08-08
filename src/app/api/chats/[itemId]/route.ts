@@ -8,15 +8,19 @@ import fs from "fs";
 import path from "path";
 import { Buffer } from "buffer";
 
+// Define type for route context params
+type RouteContext = {
+  params: {
+    itemId: string;
+  };
+};
+
 const getAdminUser = async () => {
   return await User.findOne({ isAdmin: true });
 };
 
 // GET messages
-export async function GET(
-  req: NextRequest,
-  context: { params: { itemId: string } }
-) {
+export async function GET(req: NextRequest, context: RouteContext) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
@@ -28,13 +32,13 @@ export async function GET(
 
     const admin = await getAdminUser();
     const isAllowed =
-      userId === item.claimedBy.toString() || userId === admin._id.toString();
+      userId === item.claimedBy.toString() || userId === admin?._id.toString();
     if (!isAllowed)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const chats = await Chat.find({
       item: item._id,
-      participants: { $all: [item.claimedBy, admin._id] },
+      participants: { $all: [item.claimedBy, admin!._id] },
     })
       .populate("participants", "username email")
       .populate("sender", "username email")
@@ -53,10 +57,7 @@ export async function GET(
 }
 
 // POST message
-export async function POST(
-  req: NextRequest,
-  context: { params: { itemId: string } }
-) {
+export async function POST(req: NextRequest, context: RouteContext) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
@@ -68,16 +69,24 @@ export async function POST(
 
     const admin = await getAdminUser();
     const isAllowed =
-      userId === item.claimedBy.toString() || userId === admin._id.toString();
+      userId === item.claimedBy.toString() || userId === admin?._id.toString();
     if (!isAllowed)
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const formData = await req.formData();
     const text = formData.get("text")?.toString() || "";
-    const file = formData.get("file") as File | null;
+    const fileData = formData.get("file");
 
     let fileUrl: string | null = null;
-    if (file && file.size > 0) {
+
+    // Type check for file-like object
+    if (
+      fileData &&
+      typeof fileData === "object" &&
+      "size" in fileData &&
+      (fileData as File).size > 0
+    ) {
+      const file = fileData as File;
       const buffer = Buffer.from(await file.arrayBuffer());
       const filename = `${Date.now()}-${file.name}`;
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
@@ -87,7 +96,7 @@ export async function POST(
       fileUrl = `/uploads/${filename}`;
     }
 
-    const participants = [item.claimedBy, admin._id];
+    const participants = [item.claimedBy, admin!._id];
 
     const newChat = new Chat({
       item: item._id,
