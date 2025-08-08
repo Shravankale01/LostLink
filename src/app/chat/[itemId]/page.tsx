@@ -1,9 +1,17 @@
-
-"use client";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
 import { Paperclip } from "lucide-react";
+import Image from "next/image"; // Import Next.js Image component
+
+interface ChatMessage {
+  _id: string;
+  sender?: {
+    username: string;
+  };
+  text?: string;
+  file?: string;
+}
 
 export default function ChatPage() {
   const { itemId } = useParams<{ itemId: string }>();
@@ -11,9 +19,9 @@ export default function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const [itemTitle, setItemTitle] = useState("");
-  const [messages, setMessages] = useState<any[]>([]);
-  const [newMsg, setNewMsg] = useState("");
+  const [itemTitle, setItemTitle] = useState<string>("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMsg, setNewMsg] = useState<string>("");
   const [attachment, setAttachment] = useState<File | null>(null);
 
   // Get item title
@@ -30,9 +38,13 @@ export default function ChatPage() {
   const fetchMessages = async () => {
     try {
       const res = await axios.get(`/api/chats/${itemId}`);
-      setMessages(res.data.messages);
-    } catch (err) {
-      console.error("Failed to load messages", err);
+      setMessages(res.data.messages as ChatMessage[]);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Failed to load messages:", error.message);
+      } else {
+        console.error("Failed to load messages:", error);
+      }
     }
   };
 
@@ -49,8 +61,12 @@ export default function ChatPage() {
       setNewMsg("");
       setAttachment(null);
       await fetchMessages();
-    } catch (err) {
-      console.error("Failed to send message", err);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Failed to send message:", error.message);
+      } else {
+        console.error("Failed to send message:", error);
+      }
     }
   };
 
@@ -83,7 +99,7 @@ export default function ChatPage() {
           <p className="text-gray-500 text-center">No messages yet.</p>
         ) : (
           messages.map((msg) => (
-            <div key={msg._id || Math.random()} className="bg-white p-3 rounded shadow-sm">
+            <div key={msg._id} className="bg-white p-3 rounded shadow-sm">
               <strong className="text-blue-700">{msg.sender?.username || "User"}:</strong>
               {msg.text && <p className="text-gray-700 mt-1">{msg.text}</p>}
               {msg.file && (
@@ -98,10 +114,13 @@ export default function ChatPage() {
                       📄 View PDF
                     </a>
                   ) : (
-                    <img
+                    // Use Next.js Image component to optimize images instead of <img> tag
+                    <Image
                       src={msg.file}
                       alt="Attachment"
-                      className="w-32 rounded border mt-1"
+                      width={128}
+                      height={128}
+                      className="rounded border mt-1"
                     />
                   )}
                 </div>
@@ -154,4 +173,3 @@ export default function ChatPage() {
     </div>
   );
 }
-
