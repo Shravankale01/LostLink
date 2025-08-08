@@ -1,6 +1,6 @@
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   await connectDB();
-  const userId = await getDataFromToken(req);
+  // Removed unused userId assignment
   const itemId = params.id;
   const { status } = await req.json(); // "returned" or "closed"
 
@@ -18,3 +18,4 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   return NextResponse.json({ message: `Item marked as ${status}`, item });
 }
+
