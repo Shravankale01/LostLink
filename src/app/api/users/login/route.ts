@@ -1,4 +1,3 @@
-
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModels";
 import { NextRequest, NextResponse } from "next/server";
@@ -46,8 +45,12 @@ export async function POST(request: NextRequest) {
     });
 
     return res;
-  } catch (err: any) {
-    console.error("Login error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error: unknown) {
+    let errorMessage = "Internal server error";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    console.error("Login error:", errorMessage);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
