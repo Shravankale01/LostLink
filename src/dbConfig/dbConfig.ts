@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 
 export async function connect() {
@@ -26,8 +25,12 @@ export async function connect() {
         
         return conn;
 
-    } catch (error: any) {
-        console.error('MongoDB connection error:', error.message);
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error('MongoDB connection error:', error.message);
+        } else {
+            console.error('MongoDB connection error:', error);
+        }
         // Don't throw error to prevent 500 response
         return null;
     }
