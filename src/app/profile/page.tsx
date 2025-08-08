@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
+import Image from "next/image";
 
 // Adjust the interface to match your backend item response
 interface Item {
@@ -33,8 +33,22 @@ export default function ProfilePage() {
       try {
         const res = await axios.get("/api/users/item");
         setItems(res.data.items || []);
-      } catch (err: any) {
-        setError(err.response?.data?.error || "Failed to load your items");
+      } catch (error: unknown) {
+        let message = "Failed to load your items";
+        if (
+          typeof error === "object" &&
+          error !== null &&
+          "response" in error &&
+          typeof (error as any).response === "object" &&
+          (error as any).response !== null &&
+          "data" in (error as any).response &&
+          (error as any).response.data !== null &&
+          typeof (error as any).response.data === "object" &&
+          "error" in (error as any).response.data
+        ) {
+          message = (error as any).response.data.error;
+        }
+        setError(message);
       } finally {
         setLoading(false);
       }
@@ -53,8 +67,22 @@ export default function ProfilePage() {
         toast.success("Item deleted successfully");
         setItems((prev) => prev.filter((item) => item._id !== id));
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to delete item");
+    } catch (error: unknown) {
+      let message = "Failed to delete item";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        (error as any).response.data !== null &&
+        typeof (error as any).response.data === "object" &&
+        "error" in (error as any).response.data
+      ) {
+        message = (error as any).response.data.error;
+      }
+      toast.error(message);
     } finally {
       setDeletingId(null);
     }
@@ -103,12 +131,17 @@ export default function ProfilePage() {
             >
               {/* Item Image */}
               {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt={title}
-                  className="w-full h-48 object-cover"
-                  loading="lazy"
-                />
+                <div className="relative w-full h-48">
+                  <Image
+                    src={imageUrl}
+                    alt={title}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    loading="lazy"
+                    unoptimized={false}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
               ) : (
                 <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400 text-6xl">
                   <span>📦</span>
