@@ -1,6 +1,5 @@
-
 import { NextRequest, NextResponse } from "next/server";
-import { connect } from "@/dbConfig/dbConfig";
+// Removed unused 'connect' import
 import Item from "@/models/itemModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import { writeFile } from "fs/promises";
@@ -13,7 +12,7 @@ export async function POST(req: NextRequest) {
     await connectDB();
 
     // ✅ Get current user's ID
-    const userId = await getDataFromToken(req); // ✅ Make sure req is passed
+    const userId = await getDataFromToken(req); 
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,11 +23,10 @@ export async function POST(req: NextRequest) {
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
     const status = formData.get("status") as string;
-    const image = formData.get("image") as File | null; // ✅ Changed from string to File
+    const image = formData.get("image") as File | null;
 
-    let imageUrl = ""; // ✅ Added to store image URL
+    let imageUrl = "";
 
-    // ✅ Handle image upload if file exists
     if (image && image.size > 0) {
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
       if (!fs.existsSync(uploadsDir)) {
@@ -51,16 +49,20 @@ export async function POST(req: NextRequest) {
       title,
       description,
       location,
-      imageUrl, // ✅ Changed from 'image' to 'imageUrl' to match your model
+      imageUrl,
       createdBy: userId,
-      status: status || "lost", // ✅ Use the status from form
+      status: status || "lost",
     });
 
     await newItem.save();
 
     return NextResponse.json({ success: true, item: newItem }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Add item error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
