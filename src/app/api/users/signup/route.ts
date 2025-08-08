@@ -1,5 +1,6 @@
 
 // app/api/signup/route.ts
+// app/api/users/signup/route.ts
 import { connect } from "@/dbConfig/dbConfig";
 import User from "@/models/userModels";
 import { NextRequest, NextResponse } from "next/server";
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
       isVerified: false,  // Corrected spelling here
       verifyToken: verificationToken,
-      verifyTokenExpiry: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+      verifyTokenExpiry: Date.now() + 24 * 60 * 60 * 1000, // 24 hours expiry
     });
     await newUser.save();
 
@@ -35,7 +36,6 @@ export async function POST(request: NextRequest) {
       <p>Hello ${username},</p>
       <p>Click <a href="${verifyUrl}">this link</a> to verify your email. It expires in 24 hours.</p>
       <p><em>Note: Since this is running on localhost, the verification may not complete successfully. However, you can still log in using your credentials.</em></p>
-
     `;
     await sendMail({ to: email, subject: "Verify your email", html });
 
@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
     console.error("Signup error:", err);
     return NextResponse.json(
       {
-        error: "Internal server error , If you are using a demo account, you can still log in using your credentials.",
-        message: "If you are using a demo account, you can still log in using your credentials."
+        error: "Internal server error, If you are using a demo account, you can still log in using your credentials.",
+        message: "If you are using a demo account, you can still log in using your credentials.",
       },
       { status: 500 }
     );
+  }  
 }
-
 
