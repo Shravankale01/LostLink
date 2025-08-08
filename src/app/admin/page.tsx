@@ -11,7 +11,7 @@ export default function AdminPage() {
   const [showApproved, setShowApproved] = useState(false);
 
   // Helper to get image URL from item object safely
-  const resolveImage = (item: any) => {
+  const resolveImage = (item: unknown) => {
     return (
       item.imageUrl ||
       (Array.isArray(item.images) && item.images[0]) ||
@@ -57,7 +57,7 @@ export default function AdminPage() {
 
         // Keep only claimed approved items
         const claimedApproved = (approvedData.items || []).filter(
-          (item: any) => item.status === "claimed"
+          (item: unknown) => item.status === "claimed"
         );
 
         setUnapprovedItems(unapprovedData.items || []);
@@ -91,7 +91,7 @@ export default function AdminPage() {
       const refresh = await fetch("/api/items/approved", { cache: "no-store" });
       const data = await refresh.json();
       const claimedApproved = (data.items || []).filter(
-        (item: any) => item.status === "claimed"
+        (item: unknown) => item.status === "claimed"
       );
       setApprovedItems(claimedApproved);
     }
@@ -529,3 +529,4 @@ export default function AdminPage() {
 //     </div>
 //   );
 // }
+
