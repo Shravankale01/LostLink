@@ -9,8 +9,18 @@ export const getDataFromToken = async (req: NextRequest): Promise<string | null>
 
     if (!token) return null;
 
-    const decoded: any = jwt.verify(token, process.env.TOKEN_SECRETKEY!);
-    return decoded.id;
+    const decoded: unknown = jwt.verify(token, process.env.TOKEN_SECRETKEY!);
+
+    if (
+      typeof decoded === "object" &&
+      decoded !== null &&
+      "id" in decoded &&
+      typeof (decoded as { id?: unknown }).id === "string"
+    ) {
+      return (decoded as { id: string }).id;
+    }
+
+    return null;
   } catch (error) {
     console.error("Token decode error:", error);
     return null;
