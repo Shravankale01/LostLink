@@ -1,17 +1,33 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import Image from "next/image";
+
+interface Item {
+  _id: string;
+  title: string;
+  description?: string;
+  status?: string;
+  claimedBy?: { username?: string };
+  imageUrl?: string;
+  images?: string[];
+  image?: string;
+  file?: string;
+}
 
 export default function AdminPage() {
-  const [unapprovedItems, setUnapprovedItems] = useState<any[]>([]);
-  const [approvedItems, setApprovedItems] = useState<any[]>([]);
+  const [unapprovedItems, setUnapprovedItems] = useState<Item[]>([]);
+  const [approvedItems, setApprovedItems] = useState<Item[]>([]);
   const [showApproved, setShowApproved] = useState(false);
 
+  const router = useRouter();
+
   // Helper to get image URL from item object safely
-  const resolveImage = (item: unknown) => {
+  const resolveImage = (item: Item): string | null => {
     return (
       item.imageUrl ||
       (Array.isArray(item.images) && item.images[0]) ||
@@ -20,8 +36,6 @@ export default function AdminPage() {
       null
     );
   };
-
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -34,7 +48,7 @@ export default function AdminPage() {
       } else {
         toast.error("Failed to logout");
       }
-    } catch (err) {
+    } catch (_err: unknown) {
       toast.error("Failed to logout");
     }
   };
@@ -57,12 +71,12 @@ export default function AdminPage() {
 
         // Keep only claimed approved items
         const claimedApproved = (approvedData.items || []).filter(
-          (item: unknown) => item.status === "claimed"
+          (item: Item) => item.status === "claimed"
         );
 
         setUnapprovedItems(unapprovedData.items || []);
         setApprovedItems(claimedApproved);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error fetching items:", error);
       }
     }
@@ -76,6 +90,9 @@ export default function AdminPage() {
     });
     if (res.ok) {
       setUnapprovedItems((prev) => prev.filter((item) => item._id !== id));
+      toast.success("Item approved successfully.");
+    } else {
+      toast.error("Failed to approve the item.");
     }
   };
 
@@ -91,23 +108,24 @@ export default function AdminPage() {
       const refresh = await fetch("/api/items/approved", { cache: "no-store" });
       const data = await refresh.json();
       const claimedApproved = (data.items || []).filter(
-        (item: unknown) => item.status === "claimed"
+        (item: Item) => item.status === "claimed"
       );
       setApprovedItems(claimedApproved);
+      toast.success("Item status updated.");
+    } else {
+      toast.error("Failed to update item status.");
     }
   };
 
-  // New handler for unclaiming an item
   const handleUnclaim = async (id: string) => {
     const res = await fetch(`/api/items/unclaim/${id}`, {
       method: "PATCH",
     });
     if (res.ok) {
-      // Refresh only claimed approved items
       const refresh = await fetch("/api/items/approved", { cache: "no-store" });
       const data = await refresh.json();
       const claimedApproved = (data.items || []).filter(
-        (item: any) => item.status === "claimed"
+        (item: Item) => item.status === "claimed"
       );
       setApprovedItems(claimedApproved);
       toast.success("Item set to found/unclaimed again.");
@@ -159,7 +177,7 @@ export default function AdminPage() {
             <p className="text-gray-600">No claimed approved items found.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {approvedItems.map((item: any) => (
+              {approvedItems.map((item: Item) => (
                 <div
                   key={item._id}
                   className="bg-white rounded-lg shadow-lg p-5 border border-gray-200 flex flex-col justify-between"
@@ -167,15 +185,13 @@ export default function AdminPage() {
                   {/* Image */}
                   <div className="mb-3 w-full h-48 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
                     {resolveImage(item) ? (
-                      <img
-                        src={resolveImage(item)}
-                        alt={item.title}
-                        className="w-full h-full object-cover transition duration-200 hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          const placeholder = e.currentTarget.nextSibling as HTMLElement;
-                          if (placeholder) placeholder.style.display = "flex";
-                        }}
+                      <Image
+                        src={resolveImage(item) ?? "/placeholder.png"}
+                        alt={item.title || "Item image"}
+                        width={400}
+                        height={300}
+                        className="object-cover transition duration-200 hover:scale-105"
+                        unoptimized={false}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -233,7 +249,7 @@ export default function AdminPage() {
           <p className="text-gray-600">No items pending approval.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {unapprovedItems.map((item: any) => (
+            {unapprovedItems.map((item: Item) => (
               <div
                 key={item._id}
                 className="bg-white rounded-lg shadow-lg p-5 border border-gray-200"
@@ -241,15 +257,13 @@ export default function AdminPage() {
                 {/* Image */}
                 <div className="mb-3 w-full h-48 overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center">
                   {resolveImage(item) ? (
-                    <img
-                      src={resolveImage(item)}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition duration-200 hover:scale-105"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                        const placeholder = e.currentTarget.nextSibling as HTMLElement;
-                        if (placeholder) placeholder.style.display = "flex";
-                      }}
+                    <Image
+                      src={resolveImage(item) ?? "/placeholder.png"}
+                      alt={item.title || "Item image"}
+                      width={400}
+                      height={300}
+                      className="object-cover transition duration-200 hover:scale-105"
+                      unoptimized={false}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-500">
@@ -529,4 +543,5 @@ export default function AdminPage() {
 //     </div>
 //   );
 // }
+
 
