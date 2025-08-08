@@ -26,8 +26,12 @@ export async function GET(request: NextRequest) {
     await user.save();
 
     return NextResponse.redirect(`${process.env.DOMAIN}/login?verified=true`);
-  } catch (err: any) {
-    console.error("Verify error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  } catch (error: unknown) {
+    let errorMessage = "Internal server error";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    console.error("Verify error:", errorMessage);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
