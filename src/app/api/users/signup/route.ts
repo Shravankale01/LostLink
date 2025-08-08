@@ -1,4 +1,3 @@
-
 // app/api/signup/route.ts
 // app/api/users/signup/route.ts
 import { connect } from "@/dbConfig/dbConfig";
@@ -46,7 +45,13 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (err: unknown) {
-    console.error("Signup error:", err);
+    let errorMessage = "Internal server error";
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      console.error("Signup error:", errorMessage);
+    } else {
+      console.error("Signup error:", err);
+    }
     return NextResponse.json(
       {
         error: "Internal server error, If you are using a demo account, you can still log in using your credentials.",
@@ -54,7 +59,5 @@ export async function POST(request: NextRequest) {
       },
       { status: 500 }
     );
-  }  
+  }
 }
-
-
