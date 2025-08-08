@@ -13,10 +13,7 @@ const getAdminUser = async () => {
 };
 
 // GET messages
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { itemId: string } }
-) {
+export async function GET(req: NextRequest, { params }) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
@@ -53,10 +50,7 @@ export async function GET(
 }
 
 // POST message
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { itemId: string } }
-) {
+export async function POST(req: NextRequest, { params }) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
@@ -78,7 +72,6 @@ export async function POST(
 
     let fileUrl: string | null = null;
 
-    // Type check for file-like object
     if (
       fileData &&
       typeof fileData === "object" &&
