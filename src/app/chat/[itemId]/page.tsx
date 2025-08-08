@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
@@ -173,3 +175,4 @@ export default function ChatPage() {
     </div>
   );
 }
+
