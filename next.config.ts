@@ -4,12 +4,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   eslint: {
-    // This prevents ESLint errors from failing the production build
-    // Use with caution and remove once your codebase is clean
+    // Ignores all ESLint errors/warnings during build
     ignoreDuringBuilds: true,
   },
 
-  // Add other Next.js config options here if needed
+  // Other config options can go here
 };
 
 export default nextConfig;
