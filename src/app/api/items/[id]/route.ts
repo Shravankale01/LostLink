@@ -23,8 +23,9 @@ export async function GET(req: Request, context: { params: { id: string } }) {
     }
 
     return NextResponse.json({ item }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching item:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
+
