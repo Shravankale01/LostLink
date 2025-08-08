@@ -40,7 +40,8 @@ export default function SignupPage() {
         return;
       }
 
-      const response = await axios.post("/api/users/signup", {
+      // No need to assign if response isn't used
+      await axios.post("/api/users/signup", {
         username,
         email,
         password,
@@ -48,8 +49,24 @@ export default function SignupPage() {
 
       toast.success("Signup successful! Please verify your email.");
       router.push("/login");
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Signup failed");
+    } catch (error: unknown) {
+      let message = "Signup failed";
+
+      // Narrow error with safe type checks (especially for axios error)
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        (error as any).response.data !== null &&
+        typeof (error as any).response.data === "object" &&
+        "error" in (error as any).response.data
+      ) {
+        message = (error as any).response.data.error;
+      }
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -172,6 +189,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
-
-
