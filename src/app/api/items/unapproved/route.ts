@@ -22,10 +22,14 @@ export async function GET(req: NextRequest) {
     console.log("Unapproved Items:", items);
 
     return NextResponse.json({ items });
-  } catch (err: any) {
-    console.error("❌ Error in GET /api/items/unapproved:", err.message);
+  } catch (error: unknown) {
+    let errorMessage = "Internal Server Error";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      console.error("❌ Error in GET /api/items/unapproved:", errorMessage);
+    }
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
