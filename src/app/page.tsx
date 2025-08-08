@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -6,11 +5,26 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+interface Item {
+  _id: string;
+  title: string;
+  description: string;
+  status: string;
+  location?: string;
+  imageUrl?: string;
+  images?: string[];
+  image?: string;
+  file?: string;
+  isClaimed?: boolean;
+  claimedBy?: string;
+}
 
 export default function HomePage() {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
@@ -18,7 +32,7 @@ export default function HomePage() {
     try {
       const res = await axios.get("/api/items/getAll");
       setItems(res.data.items || []);
-    } catch (err) {
+    } catch (error: unknown) {
       toast.error("Failed to load items");
     } finally {
       setLoading(false);
@@ -60,12 +74,26 @@ export default function HomePage() {
         toast.success("Item claimed successfully");
         await fetchItems();
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Claim failed");
+    } catch (error: unknown) {
+      let message = "Claim failed";
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (error as any).response === "object" &&
+        (error as any).response !== null &&
+        "data" in (error as any).response &&
+        (error as any).response.data !== null &&
+        typeof (error as any).response.data === "object" &&
+        "error" in (error as any).response.data
+      ) {
+        message = (error as any).response.data.error;
+      }
+      toast.error(message);
     }
   };
 
-  const resolveImage = (item: any) => {
+  const resolveImage = (item: Item): string | null => {
     return (
       item.imageUrl ||
       (Array.isArray(item.images) && item.images[0]) ||
@@ -90,7 +118,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Beautiful profile icon and centered title */}
       <div className="relative mb-8 max-w-6xl mx-auto flex flex-col items-center">
         <button
           onClick={() => router.push("/profile")}
@@ -108,7 +135,7 @@ export default function HomePage() {
             stroke="currentColor"
             strokeWidth={2}
           >
-            <circle cx="12" cy="8" r="4" stroke="white" strokeWidth="2" fill="currentColor"/>
+            <circle cx="12" cy="8" r="4" stroke="white" strokeWidth="2" fill="currentColor" />
             <path
               stroke="white"
               strokeWidth="2"
@@ -124,11 +151,8 @@ export default function HomePage() {
         </h1>
       </div>
 
-      {/* Top Actions Row (Search & Add/Logout Buttons) */}
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between mb-8 gap-4 px-2 sm:px-0">
-        {/* Spacer at left for profile button placement */}
         <div className="w-14 h-0 hidden sm:block" />
-        {/* Search */}
         <div className="flex-grow min-w-[220px] max-w-md w-full">
           <input
             type="text"
@@ -139,7 +163,6 @@ export default function HomePage() {
             aria-label="Search items"
           />
         </div>
-        {/* Buttons */}
         <div className="flex gap-3 flex-shrink-0">
           <Link href="/add_item">
             <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition duration-200 font-semibold whitespace-nowrap">
@@ -155,7 +178,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Items Grid */}
       <div className="max-w-6xl mx-auto px-2 sm:px-0">
         {loading ? (
           <p className="text-center text-gray-600">Loading items...</p>
@@ -163,79 +185,82 @@ export default function HomePage() {
           <p className="text-center text-gray-500">No items found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredItems.map((item) => (
-              <div
-                key={item._id}
-                className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-200"
-              >
-                {/* Image Section */}
-                <div className="mb-4">
-                  {resolveImage(item) ? (
-                    <div className="w-full h-48 overflow-hidden rounded-lg">
-                      <img
-                        src={resolveImage(item)}
-                        alt={item.title}
-                        className="w-full h-full object-cover transition duration-200 hover:scale-105"
-                        onError={(e) => {
-                          const imgElement = e.currentTarget as HTMLImageElement;
-                          imgElement.style.display = "none";
-                          const placeholder = imgElement.nextElementSibling as HTMLElement;
-                          if (placeholder) placeholder.style.display = "flex";
-                        }}
-                      />
-                      {/* Fallback placeholder (hidden by default) */}
-                      <div
-                        className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center text-gray-500"
-                        style={{ display: "none" }}
-                      >
+            {filteredItems.map((item) => {
+              const imageSrc = resolveImage(item);
+              return (
+                <div
+                  key={item._id}
+                  className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition duration-200"
+                >
+                  <div className="mb-4">
+                    {imageSrc ? (
+                      <div className="w-full h-48 overflow-hidden rounded-lg relative">
+                        <Image
+                          src={imageSrc}
+                          alt={item.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover transition duration-200 hover:scale-105"
+                          onError={(e) => {
+                            const imgElement = e.currentTarget as HTMLImageElement;
+                            imgElement.style.display = "none";
+                            const placeholder = imgElement.nextElementSibling as HTMLElement | null;
+                            if (placeholder) placeholder.style.display = "flex";
+                          }}
+                        />
+                        {/* Fallback placeholder (hidden by default) */}
+                        <div
+                          className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 absolute top-0 left-0"
+                          style={{ display: "none" }}
+                        >
+                          <span>No Image Available</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
                         <span>No Image Available</span>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-                      <span>No Image Available</span>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                {/* Content Section */}
-                <div className="mb-4">
-                  <h2 className="text-xl font-bold mb-2 text-gray-800">{item.title}</h2>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                      {item.status}
-                    </span>
-                    {item.location && (
-                      <span className="inline-block bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
-                        📍 {item.location}
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold mb-2 text-gray-800">{item.title}</h2>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                        {item.status}
                       </span>
+                      {item.location && (
+                        <span className="inline-block bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs">
+                          📍 {item.location}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-gray-100">
+                    {item.isClaimed && item.claimedBy === currentUserId ? (
+                      <Link href={`/chat/${item._id}`}>
+                        <button className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
+                          💬 Open Chat
+                        </button>
+                      </Link>
+                    ) : item.isClaimed ? (
+                      <div className="w-full bg-red-50 text-red-600 px-4 py-2 rounded-lg text-center font-medium border border-red-200">
+                        ❌ Already Claimed
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleClaim(item._id)}
+                        className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
+                      >
+                        🤝 Claim
+                      </button>
                     )}
                   </div>
                 </div>
-                {/* Action Section */}
-                <div className="pt-3 border-t border-gray-100">
-                  {item.isClaimed && item.claimedBy === currentUserId ? (
-                    <Link href={`/chat/${item._id}`}>
-                      <button className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 font-medium">
-                        💬 Open Chat
-                      </button>
-                    </Link>
-                  ) : item.isClaimed ? (
-                    <div className="w-full bg-red-50 text-red-600 px-4 py-2 rounded-lg text-center font-medium border border-red-200">
-                      ❌ Already Claimed
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handleClaim(item._id)}
-                      className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
-                    >
-                      🤝 Claim
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
