@@ -1,18 +1,33 @@
 "use client";
 import { useEffect, useState } from "react";
 
+interface ChatMessage {
+  _id: string;
+  sender: {
+    username: string;
+    // extend as needed
+  };
+  text?: string;
+  file?: string;
+}
+
 export default function ChatBox({ itemId }: { itemId: string }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     async function fetchMessages() {
-      const res = await fetch(`/api/chats/${itemId}`, { cache: "no-store" });
-      const data = await res.json();
-      setMessages(data.messages);
+      try {
+        const res = await fetch(`/api/chats/${itemId}`, { cache: "no-store" });
+        const data = await res.json();
+        if (data.messages && Array.isArray(data.messages)) {
+          setMessages(data.messages as ChatMessage[]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
     }
-
     fetchMessages();
   }, [itemId]);
 
@@ -22,16 +37,23 @@ export default function ChatBox({ itemId }: { itemId: string }) {
     if (text) formData.append("text", text);
     if (file) formData.append("file", file);
 
-    const res = await fetch(`/api/chat/send`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`/api/chat/send`, {
+        method: "POST",
+        body: formData,
+      });
 
-    if (res.ok) {
-      const newMsg = await res.json();
-      setMessages((prev) => [...prev, newMsg.message]);
-      setText("");
-      setFile(null);
+      if (res.ok) {
+        const newMsg = await res.json();
+        // Assuming newMsg.message is a ChatMessage:
+        setMessages((prev) => [...prev, newMsg.message as ChatMessage]);
+        setText("");
+        setFile(null);
+      } else {
+        console.error("Failed to send message:", await res.text());
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
@@ -41,9 +63,16 @@ export default function ChatBox({ itemId }: { itemId: string }) {
       <div className="max-h-60 overflow-y-auto space-y-2 mb-2">
         {messages.map((msg) => (
           <div key={msg._id} className="text-sm">
-            <p><strong>{msg.sender.username || "User"}:</strong> {msg.text}</p>
+            <p>
+              <strong>{msg.sender?.username || "User"}:</strong> {msg.text}
+            </p>
             {msg.file && (
-              <a href={msg.file} className="text-blue-500 underline" target="_blank">
+              <a
+                href={msg.file}
+                className="text-blue-500 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 View Attachment
               </a>
             )}
