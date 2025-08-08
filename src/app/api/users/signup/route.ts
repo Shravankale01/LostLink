@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Signup error:", err);
     return NextResponse.json(
       {
@@ -56,4 +56,5 @@ export async function POST(request: NextRequest) {
     );
   }  
 }
+
 
