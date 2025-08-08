@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import connectDB from "@/lib/db";
@@ -47,8 +46,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     return NextResponse.json({ success: true, item }, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Claim item error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
