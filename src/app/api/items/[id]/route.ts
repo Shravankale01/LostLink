@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 export async function GET(
   req: NextRequest,
-  { params }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB();
