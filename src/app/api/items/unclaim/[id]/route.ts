@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
 import mongoose from "mongoose";
 
 // PATCH /api/items/unclaim/[id]
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }) {
   await connectDB();
   const { id } = params;
 
@@ -26,5 +26,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
   await item.save();
 
-  return NextResponse.json({ message: "Item status set to found and unclaimed." }, { status: 200 });
+  return NextResponse.json(
+    { message: "Item status set to found and unclaimed." },
+    { status: 200 }
+  );
 }
