@@ -4,7 +4,7 @@ import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
 import Chat from "@/models/chatModel";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }) {
   try {
     await connectDB();
 
