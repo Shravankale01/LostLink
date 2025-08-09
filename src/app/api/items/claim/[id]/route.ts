@@ -4,11 +4,14 @@ import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
 import Chat from "@/models/chatModel";
 
-export async function PATCH(req: NextRequest, { params }) {
+export async function PATCH(req: NextRequest, context: any) {
+  // Cast context to expected type
+  const { params } = context as { params: { id: string } };
+  const itemId = params.id;
+
   try {
     await connectDB();
 
-    const itemId = params.id;
     const userId = await getDataFromToken(req);
 
     console.log("Claiming item:", itemId);
@@ -21,7 +24,10 @@ export async function PATCH(req: NextRequest, { params }) {
     const item = await Item.findById(itemId);
 
     if (!item || item.status === "claimed") {
-      return NextResponse.json({ error: "Item already claimed or not found" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Item already claimed or not found" },
+        { status: 400 }
+      );
     }
 
     item.status = "claimed";
@@ -40,8 +46,8 @@ export async function PATCH(req: NextRequest, { params }) {
       await Chat.create({
         item: itemId,
         participants: [item.createdBy, userId],
-        sender: userId,          // REQUIRED field added here
-        messages: [],            // Initialize if your schema requires it
+        sender: userId, // REQUIRED field added here
+        messages: [], // Initialize if your schema requires it
       });
     }
 
