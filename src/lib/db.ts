@@ -12,16 +12,21 @@ interface MongooseCache {
 }
 
 declare global {
+  // allow globalThis.mongooseCache to be undefined initially
   var mongooseCache: MongooseCache | undefined;
 }
 
-let cached = globalThis.mongooseCache;
+// Initialize cache or reuse existing
+let cached: MongooseCache;
 
-if (!cached) {
-  cached = globalThis.mongooseCache = { conn: null, promise: null };
+if (!globalThis.mongooseCache) {
+  globalThis.mongooseCache = { conn: null, promise: null };
 }
 
+cached = globalThis.mongooseCache;
+
 async function connectDB() {
+  // Non-null assertion (!) prevents TS "possibly undefined" error
   if (cached.conn) {
     return cached.conn;
   }
@@ -34,6 +39,7 @@ async function connectDB() {
       return mongoose;
     });
   }
+
   cached.conn = await cached.promise;
   return cached.conn;
 }
