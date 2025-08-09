@@ -13,7 +13,10 @@ const getAdminUser = async () => {
 };
 
 // GET messages
-export async function GET(req: NextRequest, { params }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { itemId: string } }
+) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
@@ -50,7 +53,10 @@ export async function GET(req: NextRequest, { params }) {
 }
 
 // POST message
-export async function POST(req: NextRequest, { params }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { itemId: string } }
+) {
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
