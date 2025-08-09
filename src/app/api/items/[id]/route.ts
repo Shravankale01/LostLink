@@ -5,12 +5,14 @@ import mongoose from "mongoose";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: any // Accept context as any here
 ) {
+  // Cast context.params to your expected typed object internally
+  const { params } = context as { params: { id: string } };
+  const { id } = params;
+
   try {
     await connectDB();
-
-    const { id } = params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
