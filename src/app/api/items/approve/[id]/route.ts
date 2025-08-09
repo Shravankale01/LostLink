@@ -4,12 +4,15 @@ import Item from "@/models/itemModel";
 import User from "@/models/userModels";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
-export async function PATCH(req: NextRequest, { params }) {
+export async function PATCH(req: NextRequest, context: any) {
+  // Cast context to the shape you expect
+  const { params } = context as { params: { id: string } };
+  const { id: itemId } = params;
+
   try {
     await connectDB();
 
     const userId = await getDataFromToken(req);
-    const itemId = params.id; // access params directly
 
     const user = await User.findById(userId);
     if (!user || !user.isAdmin) {
