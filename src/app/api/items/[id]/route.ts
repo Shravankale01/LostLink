@@ -3,17 +3,15 @@ import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
 import mongoose from "mongoose";
 
-// Correct GET signature for Next.js API handler
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }
 ) {
   try {
     await connectDB();
 
     const { id } = params;
 
-    // Validate ID format first
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Invalid item ID" }, { status: 400 });
     }
