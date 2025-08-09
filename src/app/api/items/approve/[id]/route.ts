@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
 import User from "@/models/userModels";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }) {
   try {
     await connectDB();
 
     const userId = await getDataFromToken(req);
-    const itemId = params.id; // ✅ access params here
+    const itemId = params.id; // access params directly
 
     const user = await User.findById(userId);
     if (!user || !user.isAdmin) {
