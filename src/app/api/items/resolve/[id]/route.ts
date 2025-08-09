@@ -1,6 +1,10 @@
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+import { NextRequest, NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import Item from "@/models/itemModel";
+
+export async function PATCH(req: NextRequest, { params }) {
   await connectDB();
-  // Removed unused userId assignment
+  
   const itemId = params.id;
   const { status } = await req.json(); // "returned" or "closed"
 
