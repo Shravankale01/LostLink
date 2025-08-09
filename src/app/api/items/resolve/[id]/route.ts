@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
 
-export async function PATCH(req: NextRequest, { params }) {
-  await connectDB();
-  
+export async function PATCH(req: NextRequest, context: any) {
+  // Cast context to the shape we expect
+  const { params } = context as { params: { id: string } };
   const itemId = params.id;
+
+  await connectDB();
+
   const { status } = await req.json(); // "returned" or "closed"
 
   if (!["returned", "closed"].includes(status)) {
@@ -22,4 +25,3 @@ export async function PATCH(req: NextRequest, { params }) {
 
   return NextResponse.json({ message: `Item marked as ${status}`, item });
 }
-
