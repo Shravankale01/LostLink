@@ -1,7 +1,6 @@
-
 "use client";
 import React, { useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -43,7 +42,13 @@ export default function AddItemPage() {
       toast.success("Item added successfully!");
       router.push("/profile");
     } catch (err: unknown) {
-      toast.error(err.response?.data?.error || "Something went wrong");
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.error || "Something went wrong");
+      } else if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -165,9 +170,8 @@ export default function AddItemPage() {
             Status
           </label>
           <div className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700">
-          {item.status}
-        </div>
-
+            {item.status}
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -187,4 +191,3 @@ export default function AddItemPage() {
     </div>
   );
 }
-
