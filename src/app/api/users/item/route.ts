@@ -1,36 +1,39 @@
-// GET /api/users/items 
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Item from "@/models/itemModel";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 export async function GET(req: Request) {
   await connectDB();
 
   // 1. Read token from cookie
-  const token = req.headers.get('cookie')
-    ?.split('; ')
-    .find(row => row.startsWith('token='))
-    ?.split('=')[1];
+  const token = req.headers.get("cookie")
+    ?.split("; ")
+    .find(row => row.startsWith("token="))
+    ?.split("=")[1];
 
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // 2. Decode user info from token
-  let decoded;
+  let decoded: string | JwtPayload;
   try {
     decoded = jwt.verify(token, process.env.TOKEN_SECRETKEY!);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
- 
+  // 3. Ensure decoded is an object with 'id'
+  if (typeof decoded === "string" || !decoded || !("id" in decoded)) {
+    return NextResponse.json({ error: "Invalid token data" }, { status: 401 });
+  }
 
-  const items = await Item.find({ createdBy: decoded.id })
-    .populate("claimedBy", "username email _id") // adjust as needed for your mongoose schema
+  const userId = (decoded as JwtPayload).id;
+
+  const items = await Item.find({ createdBy: userId })
+    .populate("claimedBy", "username email _id") // adjust as needed
     .lean();
-
 
   return NextResponse.json({ items }, { status: 200 });
 }
