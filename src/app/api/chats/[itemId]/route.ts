@@ -13,24 +13,25 @@ const getAdminUser = async () => {
 };
 
 // GET messages
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { itemId: string } }
-) {
+export async function GET(req: NextRequest, context: any) {
+  const { params } = context as { params: { itemId: string } };
+  const { itemId } = params;
+
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
-    const { itemId } = params;
 
     const item = await Item.findById(itemId);
-    if (!item || !item.claimedBy)
+    if (!item || !item.claimedBy) {
       return NextResponse.json({ error: "Item not claimed" }, { status: 400 });
+    }
 
     const admin = await getAdminUser();
     const isAllowed =
       userId === item.claimedBy.toString() || userId === admin?._id.toString();
-    if (!isAllowed)
+    if (!isAllowed) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const chats = await Chat.find({
       item: item._id,
@@ -53,24 +54,25 @@ export async function GET(
 }
 
 // POST message
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { itemId: string } }
-) {
+export async function POST(req: NextRequest, context: any) {
+  const { params } = context as { params: { itemId: string } };
+  const { itemId } = params;
+
   try {
     await connectDB();
     const userId = await getDataFromToken(req);
-    const { itemId } = params;
 
     const item = await Item.findById(itemId);
-    if (!item || !item.claimedBy)
+    if (!item || !item.claimedBy) {
       return NextResponse.json({ error: "Item not claimed" }, { status: 400 });
+    }
 
     const admin = await getAdminUser();
     const isAllowed =
       userId === item.claimedBy.toString() || userId === admin?._id.toString();
-    if (!isAllowed)
+    if (!isAllowed) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const formData = await req.formData();
     const text = formData.get("text")?.toString() || "";
@@ -88,7 +90,9 @@ export async function POST(
       const buffer = Buffer.from(await file.arrayBuffer());
       const filename = `${Date.now()}-${file.name}`;
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
       const filePath = path.join(uploadsDir, filename);
       fs.writeFileSync(filePath, buffer);
       fileUrl = `/uploads/${filename}`;
