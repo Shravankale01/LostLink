@@ -4,9 +4,12 @@ import Item from "@/models/itemModel";
 import mongoose from "mongoose";
 
 // PATCH /api/items/unclaim/[id]
-export async function PATCH(req: NextRequest, { params }) {
-  await connectDB();
+export async function PATCH(req: NextRequest, context: any) {
+  // Cast context to the expected type
+  const { params } = context as { params: { id: string } };
   const { id } = params;
+
+  await connectDB();
 
   // Validate ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
