@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     await connectDB();
 
     // Pass the request object to your user ID helper
-    const userId = await getCurrentUserId(req);
+    const userId = await getCurrentUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
