@@ -137,7 +137,7 @@ export default function ChatPage() {
       <div className="flex gap-2 items-center">
         <input
           type="text"
-          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none text-black focus:ring-2 focus:ring-blue-500"
           placeholder="Type your message..."
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
