@@ -1,63 +1,63 @@
 # LostLink
-LostLink Next.js Application
-A secure, scalable, and modern full-stack Lost & Found web application built with Next.js, featuring user authentication, email verification, middleware protection, dynamic API routes, real-time chat, and beautiful Tailwind CSS styling.
+LostLink Full-Stack App
+A modern, full-stack LostLink application designed to help users within an Organization (officlecollege) easily register lost or found items, upload images directly into MongoDB, and connect with claimants via integrated chat. Featuring robust user authentication, admin moderation, and seamless image handling without relying on external storage.
 
-Features
-JWT Authentication:
-Secure login and session management with JSON Web Tokens.
+🌐 Live: Successfully deployed on Vercel for fast, reliable, and scalable hosting.
 
-Email Verification:
-Account activation via verification emails using Nodemailer.
+🚀 Features
+User Authentication: Secure login and signup with JWT tokens stored in HTTP-only cookies.
 
-Middleware & Route Protection:
-Custom Next.js middleware for protecting private routes and enforcing user authorization.
+Item Management: Users can add found items with detailed descriptions, location, and images.
 
-Next.js Full-Stack Framework:
-Uses Next.js app directory, server-side rendering, API routes, and React client components.
+Image Storage: Images up to 16 MB are directly stored as binary data in MongoDB and served as Base64 data URLs — no external file storage or cloud needed.
 
-Tailwind CSS Styling:
-Responsive, utility-first UI designed with Tailwind CSS.
+Admin Dashboard: Moderators can approve items, manage claims, and update statuses.
 
-MongoDB & Mongoose:
-Schemas and data modeling with Mongoose, connected to MongoDB Atlas.
+Real-time Chat: Users can chat about items with claimants through a dedicated chatbox.
 
-Dynamic REST API Routes:
-CRUD operations for lost/found items with dynamic routing.
+Profile Page: Users view and manage their listed items with images and status.
 
-File Uploads & Attachments:
-Supports image and PDF uploads on items and chat messages.
+SSR and CSR Support: Smooth server-side and client-side rendering with Next.js.
 
-Real-time Chat per Item:
-Dedicated chat channels linked to specific lost or found items.
+📁 Project Structure Highlights
+models/itemModel.ts — Mongoose schema updated to store images as binary buffers and MIME types.
 
-React Hot Toast Notifications:
-User feedback with toast notifications for errors, success, and info.
+API Routes — Modular Next.js API endpoints for all CRUD, authentication, and image-serving.
 
-Tech Stack
-Next.js (React Framework)
+Pages — React/Next.js components for Add Item form, Admin dashboard, Home page, Profile page, and Chatbox.
 
-Tailwind CSS
+Authentication Helpers — Centralized token and user session utilities for secure access.
 
-MongoDB Atlas
+💡 Why This Project?
+This app serves as a modern, Organization-oriented lost & found portal:
 
-Mongoose
+Simplifies image uploads by storing them directly in the database.
 
-JWT for Authentication
+Provides a moderated environment through admin approvals.
 
-Nodemailer
+Enhances user communication with chat integration.
 
-React Hot Toast
+Ensures secure and reliable authentication.
 
-Axios
+Built with performance and scalability in mind.
 
-Lucide React Icons
+⚙️ Tech Stack
+Framework: Next.js + React
 
-Getting Started
+Database: MongoDB with Mongoose
+
+Auth: JWT + HTTP-only cookies
+
+Image Handling: MongoDB Binary Buffers + Base64 URLs
+
+Hosting: Vercel (live and fully functional)
+
+Styling: Tailwind CSS
+
+📚 Getting Started
 Prerequisites
-Node.js v16+
+Node.js >= 18.x
 
-MongoDB Atlas cluster
+MongoDB database (local or cloud)
 
-SMTP email service for email verification
-
-Git installed for source control.
+Experience it live! Check out the fully deployed LostLink app on Vercel — https://lost-link-eta.vercel.app/🚀
