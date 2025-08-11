@@ -60,4 +60,4 @@ Node.js >= 18.x
 
 MongoDB database (local or cloud)
 
-Experience it live! Check out the fully deployed LostLink app on Vercel — https://lost-link-eta.vercel.app/🚀
+Experience it live! Check out the fully deployed LostLink app on Vercel — https://lost-link-eta.vercel.app/   🚀
