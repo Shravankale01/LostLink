@@ -58,6 +58,6 @@ Styling: Tailwind CSS
 Prerequisites
 Node.js >= 18.x
 
-MongoDB database (local or cloud)
+MongoDB database Atlas (cloud)
 
 Experience it live! Check out the fully deployed LostLink app on Vercel — https://lost-link-eta.vercel.app/   🚀
